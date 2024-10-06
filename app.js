@@ -6,10 +6,12 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const newsRoutes = require('./routes/newsRoutes');
 const videoRoutes = require('./routes/videoRoutes');
+const path = require('path');
 
 dotenv.config(); // Load environment variables from .env file
 
 const app = express();
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Enable CORS for all routes (configure it as needed)
 app.use(cors());

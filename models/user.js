@@ -7,9 +7,19 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       unique: true,
     },
+    username: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique: true,
+    },
     password: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    accountType: {
+      type: DataTypes.ENUM('standard', 'premium'),
+      allowNull: false,
+      defaultValue: 'standard', // Default to 'standard'
     },
     emergencyContacts: {
       type: DataTypes.ARRAY(DataTypes.STRING), // Max 12 emergency contacts
