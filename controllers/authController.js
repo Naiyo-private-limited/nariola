@@ -155,15 +155,22 @@ exports.register = async (req, res) => {
         password: hashedPassword, // Storing the hashed password
         photo: mediaUrl || null // Optional: Photo URL if provided
       });
+      const token = jwt.sign({ id: user.id }, 'jwtSecretKey', { expiresIn: '1h' });
 
       // Respond with the created user, excluding the password
       const userWithoutPassword = {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        photo: user.photo,
-        accountType: user.accountType, // The default will be 'standard'
-        createdAt: user.createdAt
+        message: 'Registered successful',
+        token,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          emergencyContacts: user.emergencyContacts,
+          liveLocationLink: user.liveLocationLink,
+          photo: user.photo,
+          createdAt: user.createdAt,
+          // Add any other user fields you want to include here
+        },
       };
 
       res.status(201).json(userWithoutPassword);

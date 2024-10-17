@@ -26,17 +26,18 @@ const storage = multer.diskStorage({
     cb(null, userDir);  // Save video in the user-specific folder
   },
   filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
+    const ext = path.extname(file.originalname) || '.mp4';  // Default to .mp4 if no extension
     cb(null, Date.now() + ext);  // Save with a timestamp to avoid overwriting
   }
 });
 
+// Update the fileFilter function to allow .temp files and handle MIME types
 const upload = multer({
   storage: storage,
   fileFilter: (req, file, cb) => {
-    const allowedFileTypes = /mp4|mov|avi|mkv/;  // Allowed video formats
+    const allowedFileTypes = /mp4|mov|avi|mkv|temp/;  // Allow .temp and video formats
     const extname = path.extname(file.originalname).toLowerCase();
-    const isExtensionAllowed = allowedFileTypes.test(extname);
+    const isExtensionAllowed = allowedFileTypes.test(extname) || extname === '.temp';
     const mimetype = file.mimetype.startsWith('video/') || file.mimetype === 'application/octet-stream';  // Allow 'application/octet-stream' for videos
 
     // Log file extension and MIME type for debugging
@@ -79,7 +80,7 @@ router.post('/upload', upload.single('video'), async (req, res) => {
 
       // Save the video record with the uploaded video URL, user ID, and duration
       const videoRecord = await VideoRecord.create({
-        url: `/uploads/videos/${userId}/${req.file.filename}`, // Save path of the uploaded video
+        url: `http://34.171.9.179:5000/uploads/videos/${userId}/${req.file.filename}`, // Save path of the uploaded video
         userId: userId, // Associate the video with the user from request body
         duration: duration // Store the rounded duration as an integer
       });
@@ -95,6 +96,9 @@ router.post('/upload', upload.single('video'), async (req, res) => {
     res.status(500).json({ message: 'Failed to upload video', error: error.message });
   }
 });
+
+module.exports = router;
+
 
 // Route to get videos by userId
 router.get('/videos/:userId', async (req, res) => {
