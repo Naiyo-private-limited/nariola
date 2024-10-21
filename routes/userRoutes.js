@@ -13,7 +13,11 @@ router.post('/emergency-contacts/:userId', userController.addEmergencyContact);
 
 // Get all emergency contacts
 router.get('/emergency-contacts/:userId', userController.getEmergencyContacts);
+// Route to add emergency contact by email
+router.post('/:userId/emergency-contacts', userController.addEmergencyContactByEmail);
+
+// Route to get full emergency contact details
+router.get('/:userId/emergency-contacts', userController.getEmergencyContactDetails);
 // Record Video Call
-// router.post('/video-record', authMiddleware, userController.recordVideoCall);
 
 module.exports = router;
