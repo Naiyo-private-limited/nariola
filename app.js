@@ -6,6 +6,9 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const newsRoutes = require('./routes/newsRoutes');
 const videoRoutes = require('./routes/videoRoutes');
+const chatRoutes = require('./routes/chatRoutes');
+const messageRoutes = require('./routes/MessageRoutes');
+
 const path = require('path');
 
 dotenv.config(); // Load environment variables from .env file
@@ -25,6 +28,10 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/news', newsRoutes);
 app.use('/api/videos', videoRoutes);
+app.use('/api/chat', chatRoutes);
+app.use('/api/messages', messageRoutes);
+
+
 
 
 // Sync database and start server
