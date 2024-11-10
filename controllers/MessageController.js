@@ -62,3 +62,34 @@ exports.getChatMessages = async (req, res) => {
     return res.status(500).json({ error: 'Failed to retrieve messages' });
   }
 };
+// Get messages between two users (direct chat)
+exports.getDirectChatMessages = async (req, res) => {
+    try {
+      const { senderId, receiverId } = req.query;
+  
+      // Find the chat involving the two users (one-on-one chat)
+      const chat = await Chat.findOne({
+        where: { isGroupChat: false },
+        include: [{
+          model: User,
+          as: 'participants',
+          where: { id: [senderId, receiverId] }
+        }]
+      });
+  
+      if (!chat) {
+        return res.status(404).json({ error: 'Chat not found between the two users.' });
+      }
+  
+      // Get messages for the found chat
+      const messages = await Message.findAll({
+        where: { chatId: chat.id },
+        include: [{ model: User, as: 'sender', attributes: ['username', 'email'] }]
+      });
+  
+      return res.status(200).json(messages);
+    } catch (error) {
+      return res.status(500).json({ error: 'Failed to retrieve messages' });
+    }
+  };
+  

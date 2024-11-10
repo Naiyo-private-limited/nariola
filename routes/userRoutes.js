@@ -18,6 +18,8 @@ router.post('/:userId/emergency-contacts', userController.addEmergencyContactByE
 
 // Route to get full emergency contact details
 router.get('/:userId/emergency-contacts', userController.getEmergencyContactDetails);
+router.get('/', userController.getAllUsers);
+router.get('/count', userController.getUserCount);
 // Record Video Call
 
 module.exports = router;

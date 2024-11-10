@@ -17,6 +17,8 @@ db.Comment = require('./comment')(sequelize, Sequelize);
 db.VideoRecord = require('./videoRecord')(sequelize, Sequelize);
 db.Chat = require('./Chats.js')(sequelize, Sequelize); // Standardize naming: 'Chat'
 db.Message = require('./Messages.js')(sequelize, Sequelize); // Standardize naming: 'Message'
+db.LiveLocation = require('./LiveLocation.js')(sequelize, Sequelize); // Standardize naming: 'Message'
+ 
 
 // Associations
 db.User.hasMany(db.VideoRecord);

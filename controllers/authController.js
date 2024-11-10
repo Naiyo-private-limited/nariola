@@ -101,7 +101,6 @@
 //   }
 // };
 const db = require('../models');
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path'); // Ensure 'path' is imported
@@ -119,67 +118,82 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage }).single('photo'); // Using single middleware
 
 exports.register = async (req, res) => {
+  // Handle file upload
   upload(req, res, async (err) => {
     if (err) {
+      console.error('File upload error:', err);
       return res.status(500).json({ message: 'File upload error', error: err });
     }
 
     try {
       const { name, email, password } = req.body;
 
-      console.log(req.body);  // Logging the request body
-      console.log(req.file);  // Logging the file info
+      // Logging the request body and file info for debugging
+      console.log('Request body:', req.body);
+      console.log('Uploaded file:', req.file);
 
-      // Check if email is provided
-      if (!email) {
-        return res.status(400).json({ message: 'Email is required' });
+      // Check if required fields are provided
+      if (!name || !email || !password) {
+        return res.status(400).json({ message: 'Name, email, and password are required.' });
       }
 
       // Check if email is already registered
-      const existingUser = await db.User.findOne({ where: { email } });
-      if (existingUser) {
-        return res.status(400).json({ message: 'Email already registered' });
+      const existingEmailUser = await db.User.findOne({ where: { email } });
+      if (existingEmailUser) {
+        return res.status(400).json({ message: 'Email is already registered' });
+      }
+
+      // Check if username is already taken
+      const existingUsernameUser = await db.User.findOne({ where: { username: name } });
+      if (existingUsernameUser) {
+        return res.status(400).json({ message: 'Username is already taken' });
       }
 
       // Generate the full URL for the uploaded image, if available
       const serverIP = 'http://34.171.9.179:5000'; // Replace with your actual server IP or domain
       const mediaUrl = req.file ? `${serverIP}/uploads/${req.file.filename}` : null;
 
-      // Hash the password before storing
-      const hashedPassword = await bcrypt.hash(password, 10);
-
-      // Create the new user
+      // Create the new user without hashing the password
       const user = await db.User.create({
         username: name,
         email,
-        password: hashedPassword, // Storing the hashed password
+        password, // Storing the password as plain text
         photo: mediaUrl || null // Optional: Photo URL if provided
       });
+
+      // Generate JWT token for the user
       const token = jwt.sign({ id: user.id }, 'jwtSecretKey', { expiresIn: '1h' });
 
       // Respond with the created user, excluding the password
       const userWithoutPassword = {
-        message: 'Registered successful',
+        message: 'Registration successful',
         token,
         user: {
           id: user.id,
           username: user.username,
           email: user.email,
-          emergencyContacts: user.emergencyContacts,
-          liveLocationLink: user.liveLocationLink,
+          emergencyContacts: user.emergencyContacts || [],
+          liveLocationLink: user.liveLocationLink || null,
           photo: user.photo,
           createdAt: user.createdAt,
-          // Add any other user fields you want to include here
         },
       };
 
       res.status(201).json(userWithoutPassword);
     } catch (error) {
       console.error('Error in registration:', error);
+      
+      // Check if error is a Sequelize unique constraint error
+      if (error.name === 'SequelizeUniqueConstraintError') {
+        const field = error.errors[0]?.path || 'field';
+        return res.status(400).json({ message: `${field} must be unique` });
+      }
+
       res.status(500).json({ message: 'Server error. Please try again.' });
     }
   });
 };
+
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -190,9 +204,8 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: 'Invalid email or password' });
     }
 
-    // Compare passwords
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
+    // Check if the provided password matches the user's password
+    if (password !== user.password) {
       return res.status(400).json({ message: 'Invalid email or password' });
     }
 

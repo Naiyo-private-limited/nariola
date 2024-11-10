@@ -8,6 +8,7 @@ const newsRoutes = require('./routes/newsRoutes');
 const videoRoutes = require('./routes/videoRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 const messageRoutes = require('./routes/MessageRoutes');
+const liveLocationRoutes = require('./routes/liveLocation');
 
 const path = require('path');
 
@@ -30,6 +31,8 @@ app.use('/api/news', newsRoutes);
 app.use('/api/videos', videoRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/loc', liveLocationRoutes);
+
 
 
 
