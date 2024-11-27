@@ -24,7 +24,7 @@ exports.createArticle = (req, res) => {
     }
 
     // Now handle the other form data
-    const { title, description } = req.body;
+    const { title, description, categories } = req.body;
 
     try {
       // Generate the full URL for the uploaded image
@@ -35,6 +35,7 @@ exports.createArticle = (req, res) => {
       const article = await db.Article.create({
         title,
         description,
+        categories,
         photo: mediaUrl // Save the full URL of the image in the database
       });
 

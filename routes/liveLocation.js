@@ -77,37 +77,36 @@ router.post('/location', async (req, res) => {
 
 // module.exports = router;
 
-// GET /location/:userId
-router.get('/location/:userId', async (req, res) => {
-    try {
-        const { userId } = req.params;
-
-        // Fetch all locations for the user
-        const locations = await LiveLocation.findAll({
-            where: { userId },
-            order: [['timestamp', 'DESC']],  // Most recent first
-        });
-
-        if (locations.length === 0) {
-            return res.status(404).json({ error: 'No location history found for this user' });
-        }
-
-        // Generate the historyMapLink
-        const historyMapLink = `${req.protocol}://${req.get('host')}/user-history-map?userId=${userId}`;
-
-        res.status(200).json({
-            message: 'Location history retrieved',
-            historyMapLink,
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to retrieve location history' });
-    }
+// Serve the dynamic map page
+router.get('/map/:userId', (req, res) => {
+  const { userId } = req.params;
+  res.sendFile(path.join(__dirname, '../pages/map.html')); // Serve the map HTML file
 });
 
-// Serve the map view for the user's location history
-router.get('/user-history-map', (req, res) => {
-    res.sendFile(path.join(__dirname, 'pages/map.html', 'map.html'));
+// API to get the latest location data for a user
+router.get('/location/:userId', async (req, res) => {
+  try {
+      const { userId } = req.params;
+
+      // Fetch the most recent location for the user
+      const location = await LiveLocation.findOne({
+          where: { userId },
+          order: [['timestamp', 'DESC']], // Get the latest location
+      });
+
+      if (!location) {
+          return res.status(404).json({ error: 'No location history found for this user' });
+      }
+
+      // Respond with latitude and longitude
+      res.json({
+          latitude: location.latitude,
+          longitude: location.longitude,
+      });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Failed to retrieve location history' });
+  }
 });
 
 

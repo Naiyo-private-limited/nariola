@@ -9,6 +9,7 @@ const videoRoutes = require('./routes/videoRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 const messageRoutes = require('./routes/MessageRoutes');
 const liveLocationRoutes = require('./routes/liveLocation');
+const sponsorRoutes = require('./routes/sponsorRoutes');
 
 const path = require('path');
 
@@ -32,6 +33,7 @@ app.use('/api/videos', videoRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/loc', liveLocationRoutes);
+app.use('/api/sponsors', sponsorRoutes);
 
 
 
