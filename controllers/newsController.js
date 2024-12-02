@@ -51,9 +51,10 @@ exports.createArticle = (req, res) => {
 // Get all articles (No token required)
 exports.getAllArticles = async (req, res) => {
   try {
-    // Fetch all articles along with their comments (for performance, consider limiting comments)
+    // Fetch all articles along with their comments, sorted by createdAt in descending order
     const articles = await db.Article.findAll({
       include: [{ model: db.Comment }],
+      order: [['createdAt', 'DESC']], // Sort by createdAt in descending order
     });
 
     res.status(200).json(articles); // Successfully fetched all articles
@@ -61,6 +62,7 @@ exports.getAllArticles = async (req, res) => {
     res.status(500).json({ message: 'Error fetching articles', error });
   }
 };
+
 
 // Add a comment to an article (No token required)
 exports.addComment = async (req, res) => {
